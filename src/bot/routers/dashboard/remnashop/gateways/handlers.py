@@ -9,7 +9,7 @@ from pydantic import SecretStr
 
 from src.bot.states import RemnashopGateways
 from src.core.constants import USER_KEY
-from src.core.enums import Currency
+from src.core.enums import Currency, PaymentGatewayType
 from src.core.utils.formatters import format_user_log as log
 from src.core.utils.message_payload import MessagePayload
 from src.infrastructure.database.models.dto import UserDto
@@ -72,6 +72,13 @@ async def on_gateway_test(
     logger.info(f"{log(user)} Testing gateway '{gateway_id}'")
 
     try:
+        if gateway.type == PaymentGatewayType.SBP:
+            await notification_service.notify_user(
+                user=user,
+                payload=MessagePayload(i18n_key="ntf-gateway-test-payment-confirmed"),
+            )
+            return
+
         payment = await payment_gateway_service.create_test_payment(user, gateway.type)
         logger.info(f"{log(user)} Test payment successful for gateway '{gateway_id}'")
         await notification_service.notify_user(

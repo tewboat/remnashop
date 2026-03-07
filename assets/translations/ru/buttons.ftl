@@ -409,11 +409,14 @@ btn-subscription-change = 🔃 Изменить
 btn-subscription-promocode = 🎟 Активировать промокод
 btn-subscription-payment-method = { gateway-type } | { $price } { $currency }
 btn-subscription-pay = 💳 Оплатить
+btn-subscription-paid = ✅ Оплатил
 btn-subscription-get = 🎁 Получить бесплатно
 btn-subscription-back-plans = ⬅️ Назад к выбору плана
 btn-subscription-back-duration = ⬅️ Изменить длительность
 btn-subscription-back-payment-method = ⬅️ Изменить способ оплаты
 btn-subscription-connect = 🚀 Подключиться
+btn-sbp-approve = ✅ Подтвердить
+btn-sbp-cancel = ❌ Отменить
 btn-subscription-duration = { $period } | { $final_amount -> 
     [0] 🎁
     *[HAS] { $final_amount }{ $currency }

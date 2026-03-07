@@ -1,7 +1,7 @@
 import traceback
 from typing import Optional, TypedDict, cast
 
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.formatting import Text
 from aiogram_dialog import DialogManager
 from aiogram_dialog.widgets.kbd import Button, Select
@@ -11,8 +11,8 @@ from loguru import logger
 
 from src.bot.keyboards import get_user_keyboard
 from src.bot.states import Subscription
-from src.core.constants import PURCHASE_PREFIX, USER_KEY
-from src.core.enums import PaymentGatewayType, PurchaseType
+from src.core.constants import PURCHASE_PREFIX, SBP_CALLBACK_PREFIX, USER_KEY
+from src.core.enums import PaymentGatewayType, PurchaseType, UserRole
 from src.core.utils.adapter import DialogDataAdapter
 from src.core.utils.formatters import format_user_log as log
 from src.core.utils.message_payload import MessagePayload
@@ -23,6 +23,7 @@ from src.services.plan import PlanService
 from src.services.pricing import PricingService
 from src.services.settings import SettingsService
 from src.services.subscription import SubscriptionService
+from src.services.user import UserService
 
 PAYMENT_CACHE_KEY = "payment_cache"
 CURRENT_DURATION_KEY = "selected_duration"
@@ -46,9 +47,14 @@ def _load_payment_data(dialog_manager: DialogManager) -> dict[str, CachedPayment
 
 
 def _save_payment_data(dialog_manager: DialogManager, payment_data: CachedPaymentData) -> None:
-    dialog_manager.dialog_data["payment_id"] = payment_data["payment_id"]
+    if payment_data["payment_id"]:
+        dialog_manager.dialog_data["payment_id"] = payment_data["payment_id"]
+    else:
+        dialog_manager.dialog_data.pop("payment_id", None)
+
     dialog_manager.dialog_data["payment_url"] = payment_data["payment_url"]
     dialog_manager.dialog_data["final_pricing"] = payment_data["final_pricing"]
+    dialog_manager.dialog_data["sbp_request_sent"] = False
 
 
 async def _create_payment_and_get_data(
@@ -72,6 +78,13 @@ async def _create_payment_and_get_data(
     transaction_plan = PlanSnapshotDto.from_plan(plan, duration.days)
     price = duration.get_price(payment_gateway.currency)
     pricing = pricing_service.calculate(user, price, payment_gateway.currency)
+
+    if gateway_type == PaymentGatewayType.SBP:
+        return CachedPaymentData(
+            payment_id="",
+            payment_url=None,
+            final_pricing=pricing.model_dump_json(),
+        )
 
     try:
         result = await payment_gateway_service.create_payment(
@@ -116,6 +129,23 @@ async def _create_payment_and_get_data(
             payload=MessagePayload(i18n_key="ntf-subscription-payment-creation-failed"),
         )
         return None
+
+
+def _build_sbp_admin_keyboard(payment_id: str, user_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="btn-sbp-approve",
+                    callback_data=f"{SBP_CALLBACK_PREFIX}approve:{payment_id}:{user_id}",
+                ),
+                InlineKeyboardButton(
+                    text="btn-sbp-cancel",
+                    callback_data=f"{SBP_CALLBACK_PREFIX}cancel:{payment_id}:{user_id}",
+                ),
+            ]
+        ]
+    )
 
 
 @inject
@@ -308,6 +338,8 @@ async def on_plan_select(
     dialog_manager.dialog_data.pop(PAYMENT_CACHE_KEY, None)
     dialog_manager.dialog_data.pop(CURRENT_DURATION_KEY, None)
     dialog_manager.dialog_data.pop(CURRENT_METHOD_KEY, None)
+    dialog_manager.dialog_data.pop("sbp_request_sent", None)
+    dialog_manager.dialog_data.pop("payment_id", None)
 
     if len(plan.durations) == 1:
         logger.info(f"{log(user)} Auto-selected single duration '{plan.durations[0].days}'")
@@ -332,6 +364,8 @@ async def on_duration_select(
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
     logger.info(f"{log(user)} Selected subscription duration '{selected_duration}' days")
     dialog_manager.dialog_data[CURRENT_DURATION_KEY] = selected_duration
+    dialog_manager.dialog_data.pop("sbp_request_sent", None)
+    dialog_manager.dialog_data.pop("payment_id", None)
 
     adapter = DialogDataAdapter(dialog_manager)
     plan = adapter.load(PlanDto)
@@ -398,6 +432,8 @@ async def on_payment_method_select(
 
     selected_duration = dialog_manager.dialog_data[CURRENT_DURATION_KEY]
     dialog_manager.dialog_data[CURRENT_METHOD_KEY] = selected_payment_method
+    dialog_manager.dialog_data.pop("sbp_request_sent", None)
+    dialog_manager.dialog_data.pop("payment_id", None)
     cache = _load_payment_data(dialog_manager)
     cache_key = _get_cache_key(selected_duration, selected_payment_method)
 
@@ -443,3 +479,119 @@ async def on_get_subscription(
     payment_id = dialog_manager.dialog_data["payment_id"]
     logger.info(f"{log(user)} Getted free subscription '{payment_id}'")
     await payment_gateway_service.handle_payment_succeeded(payment_id)
+
+
+@inject
+async def on_sbp_paid(
+    callback: CallbackQuery,
+    widget: Button,
+    dialog_manager: DialogManager,
+    payment_gateway_service: FromDishka[PaymentGatewayService],
+    notification_service: FromDishka[NotificationService],
+    pricing_service: FromDishka[PricingService],
+    user_service: FromDishka[UserService],
+) -> None:
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    selected_payment_method = dialog_manager.dialog_data.get(CURRENT_METHOD_KEY)
+
+    if selected_payment_method != PaymentGatewayType.SBP:
+        logger.warning(f"{log(user)} Tried to request SBP confirmation for non-SBP payment")
+        return
+
+    if dialog_manager.dialog_data.get("sbp_request_sent"):
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-sbp-payment-request-already-sent"),
+        )
+        return
+
+    selected_duration = dialog_manager.dialog_data[CURRENT_DURATION_KEY]
+    purchase_type: PurchaseType = dialog_manager.dialog_data["purchase_type"]
+    adapter = DialogDataAdapter(dialog_manager)
+    plan = adapter.load(PlanDto)
+
+    if not plan:
+        raise ValueError("PlanDto not found in dialog data")
+
+    duration = plan.get_duration(selected_duration)
+    payment_gateway = await payment_gateway_service.get_by_type(PaymentGatewayType.SBP)
+
+    if not duration or not payment_gateway:
+        raise ValueError("SBP payment gateway or selected duration not found")
+
+    transaction_plan = PlanSnapshotDto.from_plan(plan, duration.days)
+    pricing = pricing_service.calculate(
+        user=user,
+        price=duration.get_price(payment_gateway.currency),
+        currency=payment_gateway.currency,
+    )
+
+    result = await payment_gateway_service.create_payment(
+        user=user,
+        plan=transaction_plan,
+        pricing=pricing,
+        purchase_type=purchase_type,
+        gateway_type=PaymentGatewayType.SBP,
+    )
+    payment_id = str(result.id)
+    dialog_manager.dialog_data["payment_id"] = payment_id
+    dialog_manager.dialog_data["sbp_request_sent"] = True
+
+    admins = await user_service.get_by_role(UserRole.ADMIN)
+    devs = await user_service.get_by_role(UserRole.DEV)
+
+    recipients = {target.telegram_id: target for target in [*admins, *devs]}
+    if recipients:
+        for recipient in recipients.values():
+            await notification_service.notify_user(
+                user=recipient,
+                payload=MessagePayload.not_deleted(
+                    i18n_key="ntf-sbp-payment-request-admin",
+                    i18n_kwargs={
+                        "payment_id": payment_id,
+                        "purchase_type": purchase_type,
+                        "final_amount": pricing.final_amount,
+                        "discount_percent": pricing.discount_percent,
+                        "original_amount": pricing.original_amount,
+                        "currency": payment_gateway.currency.symbol,
+                        "user_id": str(user.telegram_id),
+                        "user_name": user.name,
+                        "username": user.username or False,
+                        "plan_name": transaction_plan.name,
+                        "plan_type": transaction_plan.type,
+                        "plan_traffic_limit": transaction_plan.traffic_limit,
+                        "plan_device_limit": transaction_plan.device_limit,
+                        "plan_duration": transaction_plan.duration,
+                    },
+                    reply_markup=_build_sbp_admin_keyboard(payment_id, user.telegram_id),
+                ),
+            )
+    else:
+        await notification_service.notify_super_dev(
+            payload=MessagePayload.not_deleted(
+                i18n_key="ntf-sbp-payment-request-admin",
+                i18n_kwargs={
+                    "payment_id": payment_id,
+                    "purchase_type": purchase_type,
+                    "final_amount": pricing.final_amount,
+                    "discount_percent": pricing.discount_percent,
+                    "original_amount": pricing.original_amount,
+                    "currency": payment_gateway.currency.symbol,
+                    "user_id": str(user.telegram_id),
+                    "user_name": user.name,
+                    "username": user.username or False,
+                    "plan_name": transaction_plan.name,
+                    "plan_type": transaction_plan.type,
+                    "plan_traffic_limit": transaction_plan.traffic_limit,
+                    "plan_device_limit": transaction_plan.device_limit,
+                    "plan_duration": transaction_plan.duration,
+                },
+                reply_markup=_build_sbp_admin_keyboard(payment_id, user.telegram_id),
+            )
+        )
+
+    await notification_service.notify_user(
+        user=user,
+        payload=MessagePayload(i18n_key="ntf-sbp-payment-request-sent"),
+    )
+    await callback.answer()

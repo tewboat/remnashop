@@ -23,6 +23,7 @@ from .handlers import (
     on_get_subscription,
     on_payment_method_select,
     on_plan_select,
+    on_sbp_paid,
     on_subscription_plans,
 )
 
@@ -166,10 +167,16 @@ confirm = Window(
             when=F["url"],
         ),
         Button(
+            text=I18nFormat("btn-subscription-paid"),
+            id=f"{PURCHASE_PREFIX}paid",
+            on_click=on_sbp_paid,
+            when=F["is_sbp"] & ~F["is_free"],
+        ),
+        Button(
             text=I18nFormat("btn-subscription-get"),
             id=f"{PURCHASE_PREFIX}get",
             on_click=on_get_subscription,
-            when=~F["url"],
+            when=~F["url"] & ~F["is_sbp"] | F["is_free"],
         ),
     ),
     Row(

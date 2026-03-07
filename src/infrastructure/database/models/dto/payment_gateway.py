@@ -28,6 +28,7 @@ class PaymentGatewayDto(TrackableDto):
         return self.type not in {
             PaymentGatewayType.CRYPTOMUS,
             PaymentGatewayType.HELEKET,
+            PaymentGatewayType.SBP,
         }
 
 
@@ -76,6 +77,11 @@ class HeleketGatewaySettingsDto(GatewaySettingsDto):
     api_key: Optional[SecretStr] = None
 
 
+class SbpGatewaySettingsDto(GatewaySettingsDto):
+    type: Literal[PaymentGatewayType.SBP] = PaymentGatewayType.SBP
+    phone_number: Optional[str] = None
+
+
 class CryptopayGatewaySettingsDto(GatewaySettingsDto):
     type: Literal[PaymentGatewayType.CRYPTOPAY] = PaymentGatewayType.CRYPTOPAY
     shop_id: Optional[str] = None
@@ -92,6 +98,7 @@ class RobokassaGatewaySettingsDto(GatewaySettingsDto):
 
 AnyGatewaySettingsDto = Annotated[
     Union[
+        SbpGatewaySettingsDto,
         YookassaGatewaySettingsDto,
         YoomoneyGatewaySettingsDto,
         CryptomusGatewaySettingsDto,

@@ -267,6 +267,7 @@ availability-type = { $availability_type ->
 
 gateway-type = { $gateway_type ->
     [TELEGRAM_STARS] Telegram Stars
+    [SBP] СБП
     [YOOKASSA] ЮKassa
     [YOOMONEY] ЮMoney
     [CRYPTOMUS] Cryptomus

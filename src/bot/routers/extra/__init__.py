@@ -1,4 +1,4 @@
-from . import commands, error, goto, member, notification, payment, test
+from . import commands, error, goto, member, notification, payment, sbp, test
 
 __all__ = [
     "commands",
@@ -7,5 +7,6 @@ __all__ = [
     "member",
     "notification",
     "payment",
+    "sbp",
     "test",
 ]

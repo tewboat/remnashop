@@ -8,6 +8,7 @@ from .payment_gateway import (
     PaymentGatewayDto,
     PaymentResult,
     RobokassaGatewaySettingsDto,
+    SbpGatewaySettingsDto,
     YookassaGatewaySettingsDto,
     YoomoneyGatewaySettingsDto,
 )
@@ -42,6 +43,7 @@ __all__ = [
     "PaymentGatewayDto",
     "PaymentResult",
     "RobokassaGatewaySettingsDto",
+    "SbpGatewaySettingsDto",
     "YookassaGatewaySettingsDto",
     "YoomoneyGatewaySettingsDto",
     "PlanDto",

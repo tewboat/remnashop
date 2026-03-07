@@ -3,7 +3,7 @@ from uuid import UUID
 from dishka.integrations.taskiq import FromDishka, inject
 from loguru import logger
 
-from src.core.enums import TransactionStatus
+from src.core.enums import PaymentGatewayType, TransactionStatus
 from src.infrastructure.taskiq.broker import broker
 from src.services.payment_gateway import PaymentGatewayService
 from src.services.transaction import TransactionService
@@ -32,7 +32,9 @@ async def cancel_transaction_task(transaction_service: FromDishka[TransactionSer
         logger.debug("No pending transactions found")
         return
 
-    old_transactions = [tx for tx in transactions if tx.has_old]
+    old_transactions = [
+        tx for tx in transactions if tx.has_old and tx.gateway_type != PaymentGatewayType.SBP
+    ]
     logger.debug(f"Found '{len(old_transactions)}' old transactions to cancel")
 
     for transaction in old_transactions:

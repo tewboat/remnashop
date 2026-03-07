@@ -6,7 +6,7 @@ from dishka.integrations.aiogram_dialog import inject
 from fluentogram import TranslatorRunner
 
 from src.core.config import AppConfig
-from src.core.enums import PurchaseType
+from src.core.enums import PaymentGatewayType, PurchaseType
 from src.core.utils.adapter import DialogDataAdapter
 from src.core.utils.formatters import (
     i18n_format_days,
@@ -182,6 +182,12 @@ async def confirm_getter(
     result_url = dialog_manager.dialog_data["payment_url"]
     pricing_data = dialog_manager.dialog_data["final_pricing"]
     pricing = PriceDetailsDto.model_validate_json(pricing_data)
+    is_sbp = payment_gateway.type == PaymentGatewayType.SBP
+    sbp_phone = (
+        getattr(payment_gateway.settings, "phone_number", None)
+        if is_sbp and payment_gateway.settings
+        else False
+    )
 
     key, kw = i18n_format_days(duration.days)
     gateways = await payment_gateway_service.filter_active()
@@ -200,6 +206,8 @@ async def confirm_getter(
         "original_amount": pricing.original_amount,
         "currency": payment_gateway.currency.symbol,
         "url": result_url,
+        "is_sbp": is_sbp,
+        "sbp_phone": sbp_phone,
         "only_single_gateway": len(gateways) == 1,
         "only_single_duration": only_single_duration,
         "is_free": is_free,

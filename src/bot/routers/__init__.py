@@ -30,6 +30,7 @@ def setup_routers(router: Router) -> None:
     # WARNING: The order of router registration matters!
     routers = [
         extra.payment.router,
+        extra.sbp.router,
         extra.notification.router,
         extra.test.router,
         extra.commands.router,

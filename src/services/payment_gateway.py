@@ -33,6 +33,7 @@ from src.infrastructure.database.models.dto import (
     PlanSnapshotDto,
     PriceDetailsDto,
     RobokassaGatewaySettingsDto,
+    SbpGatewaySettingsDto,
     TransactionDto,
     UserDto,
     YookassaGatewaySettingsDto,
@@ -91,6 +92,9 @@ class PaymentGatewayService(BaseService):
                 case PaymentGatewayType.TELEGRAM_STARS:
                     is_active = True
                     settings = None
+                case PaymentGatewayType.SBP:
+                    is_active = False
+                    settings = SbpGatewaySettingsDto()
                 case PaymentGatewayType.YOOKASSA:
                     is_active = False
                     settings = YookassaGatewaySettingsDto()

@@ -224,7 +224,7 @@ class PaymentGatewayType(UpperStrEnum):
     HELEKET = auto()
     CRYPTOPAY = auto()
     ROBOKASSA = auto()
-
+    SBP = auto()
 
 class Currency(UpperStrEnum):
     USD = auto()
@@ -248,6 +248,7 @@ class Currency(UpperStrEnum):
     def from_gateway_type(cls, gateway_type: PaymentGatewayType) -> "Currency":
         mapping = {
             PaymentGatewayType.TELEGRAM_STARS: cls.XTR,
+            PaymentGatewayType.SBP: cls.RUB,
             PaymentGatewayType.YOOKASSA: cls.RUB,
             PaymentGatewayType.YOOMONEY: cls.RUB,
             PaymentGatewayType.ROBOKASSA: cls.RUB,

@@ -409,6 +409,40 @@ ntf-gateway-field-wrong-value = <i>❌ Некорректное значение
 ntf-gateway-test-payment-created = <i>✅ <a href="{ $url }">Тестовый платеж</a> успешно создан.</i>
 ntf-gateway-test-payment-error = <i>❌ Произошла ошибка при создании тестового платежа.</i>
 ntf-gateway-test-payment-confirmed = <i>✅ Тестовый платеж успешно обработан.</i>
+ntf-sbp-payment-request-sent = <i>✅ Заявка на проверку платежа отправлена администратору. Обычно это занимает несколько минут.</i>
+ntf-sbp-payment-request-already-sent = <i>⚠️ Заявка уже отправлена. Ожидайте подтверждения администратора.</i>
+ntf-sbp-payment-rejected = <i>❌ Деньги не поступили или поступили не в полном объеме. Если это ошибка, обратитесь в поддержку.</i>
+
+ntf-sbp-payment-request-admin =
+    <b>🧾 Заявка на ручную проверку SBP платежа</b>
+
+    <blockquote>
+    • <b>ID платежа</b>: <code>{ $payment_id }</code>
+    • <b>Тип покупки</b>: { purchase-type }
+    • <b>Сумма</b>: { $final_amount }{ $currency }
+    { $discount_percent ->
+    [0] { empty }
+    *[more] • <b>Старая цена</b>: <strike>{ $original_amount }{ $currency }</strike> (-{ $discount_percent }%)
+    }
+    </blockquote>
+
+    <b>👤 Пользователь</b>
+    <blockquote>
+    • <b>ID</b>: <code>{ $user_id }</code>
+    • <b>Имя</b>: { $user_name } { $username ->
+        [0] { empty }
+        *[HAS] (<a href="tg://user?id={ $user_id }">@{ $username }</a>)
+    }
+    </blockquote>
+
+    <b>📦 План</b>
+    <blockquote>
+    • <b>Название</b>: <code>{ $plan_name }</code>
+    • <b>Тип</b>: { plan-type }
+    • <b>Трафик</b>: { $plan_traffic_limit }
+    • <b>Устройства</b>: { $plan_device_limit }
+    • <b>Длительность</b>: { $plan_duration } дн.
+    </blockquote>
 
 ntf-subscription-plans-not-available = <i>❌ Нет доступных планов.</i>
 ntf-subscription-gateways-not-available = <i>❌ Нет доступных платежных систем.</i>
