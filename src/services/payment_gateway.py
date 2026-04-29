@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
@@ -281,7 +282,10 @@ class PaymentGatewayService(BaseService):
         i18n = self.translator_hub.get_translator_by_locale(locale=user.language)
         test_details = i18n.get("test-payment")
 
-        test_pricing = PriceDetailsDto(original_amount=2)
+        test_amount = (
+            Decimal(10) if gateway_instance.data.type == PaymentGatewayType.HELEKET else Decimal(2)
+        )
+        test_pricing = PriceDetailsDto(original_amount=test_amount, final_amount=test_amount)
         test_plan = PlanSnapshotDto.test()
 
         test_payment: PaymentResult = await gateway_instance.handle_create_payment(

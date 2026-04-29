@@ -253,7 +253,7 @@ class Currency(UpperStrEnum):
             PaymentGatewayType.YOOMONEY: cls.RUB,
             PaymentGatewayType.ROBOKASSA: cls.RUB,
             PaymentGatewayType.CRYPTOMUS: cls.USD,
-            PaymentGatewayType.HELEKET: cls.USD,
+            PaymentGatewayType.HELEKET: cls.RUB,
             PaymentGatewayType.CRYPTOPAY: cls.USD,
         }
 

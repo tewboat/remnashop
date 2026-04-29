@@ -29,7 +29,7 @@ class CryptomusGateway(BasePaymentGateway):
     _client: AsyncClient
 
     API_BASE = "https://api.cryptomus.com"
-    CURRENCY = Currency.USD
+    CURRENCY = Currency.RUB
 
     NETWORKS = ["91.227.144.54"]
 

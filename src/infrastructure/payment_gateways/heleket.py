@@ -1,6 +1,7 @@
 from aiogram import Bot
 
 from src.core.config import AppConfig
+from src.core.enums import Currency
 from src.infrastructure.database.models.dto import HeleketGatewaySettingsDto, PaymentGatewayDto
 
 from .cryptomus import CryptomusGateway
@@ -8,6 +9,7 @@ from .cryptomus import CryptomusGateway
 
 class HeleketGateway(CryptomusGateway):
     API_BASE: str = "https://api.heleket.com"
+    CURRENCY = Currency.RUB
 
     NETWORKS = ["31.133.220.8"]
 
