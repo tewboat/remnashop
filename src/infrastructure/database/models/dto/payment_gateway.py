@@ -80,6 +80,7 @@ class HeleketGatewaySettingsDto(GatewaySettingsDto):
 class SbpGatewaySettingsDto(GatewaySettingsDto):
     type: Literal[PaymentGatewayType.SBP] = PaymentGatewayType.SBP
     phone_number: Optional[str] = None
+    recipient_name: Optional[str] = None
 
 
 class CryptopayGatewaySettingsDto(GatewaySettingsDto):

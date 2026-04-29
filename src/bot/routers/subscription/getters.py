@@ -188,6 +188,11 @@ async def confirm_getter(
         if is_sbp and payment_gateway.settings
         else False
     )
+    sbp_recipient_name = (
+        getattr(payment_gateway.settings, "recipient_name", None)
+        if is_sbp and payment_gateway.settings
+        else False
+    )
 
     key, kw = i18n_format_days(duration.days)
     gateways = await payment_gateway_service.filter_active()
@@ -208,6 +213,7 @@ async def confirm_getter(
         "url": result_url,
         "is_sbp": is_sbp,
         "sbp_phone": sbp_phone,
+        "sbp_recipient_name": sbp_recipient_name,
         "only_single_gateway": len(gateways) == 1,
         "only_single_duration": only_single_duration,
         "is_free": is_free,
