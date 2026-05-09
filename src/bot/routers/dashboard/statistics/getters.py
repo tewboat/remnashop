@@ -1,3 +1,5 @@
+from datetime import timedelta
+from decimal import Decimal
 from typing import Any, Optional
 
 from aiogram_dialog import DialogManager
@@ -63,10 +65,15 @@ async def statistics_getter(
             statistics = get_plans_statistics(plans, subscriptions, transactions, i18n)
             template = "msg-statistics-plans"
         case 4:
+            subscriptions = await subscription_service.get_all()
+            transactions = await transaction_service.get_all()
+            statistics = get_deferred_income_statistics(subscriptions, transactions, i18n)
+            template = "msg-statistics-deferred-income"
+        case 5:
             promocodes = await promocode_service.get_all()
             statistics = get_promocodes_statistics(promocodes)
             template = "msg-statistics-promocodes"
-        case 5:
+        case 6:
             # referrals = await referral_service.get_all()
             # statistics = get_referrals_statistics(referrals)
             template = "msg-statistics-referrals"
@@ -76,7 +83,7 @@ async def statistics_getter(
     formatted_message = i18n.get(template, **statistics)
 
     return {
-        "pages": 4,
+        "pages": 5,
         "current_page": current_page + 1,
         "statistics": formatted_message,
     }
@@ -347,6 +354,105 @@ def get_plans_statistics(
         )
 
     return {"plans": "\n\n".join(plans_stats)}
+
+
+def get_deferred_income_statistics(
+    subscriptions: list[SubscriptionDto],
+    transactions: list[TransactionDto],
+    i18n: TranslatorRunner,
+) -> dict[str, Any]:
+    paid_transactions_by_user: dict[int, list[TransactionDto]] = {}
+    totals: dict[Currency, Decimal] = {}
+    counted_subscriptions = 0
+    skipped_subscriptions = 0
+    now = datetime_now()
+
+    for transaction in transactions:
+        if (
+            not transaction.is_completed
+            or transaction.is_test
+            or transaction.pricing.is_free
+            or not transaction.user
+        ):
+            continue
+
+        user_id = transaction.user.telegram_id
+        paid_transactions_by_user.setdefault(user_id, []).append(transaction)
+
+    for user_transactions in paid_transactions_by_user.values():
+        user_transactions.sort(key=lambda transaction: transaction.created_at or datetime_now())
+
+    for subscription in subscriptions:
+        if not subscription.is_active or subscription.is_trial:
+            continue
+
+        if not subscription.user:
+            skipped_subscriptions += 1
+            continue
+
+        if subscription.plan.is_unlimited_duration:
+            skipped_subscriptions += 1
+            continue
+
+        user_transactions = [
+            transaction
+            for transaction in paid_transactions_by_user.get(subscription.user.telegram_id, [])
+            if transaction.plan.id == subscription.plan.id and transaction.plan.duration > 0
+        ]
+        if not user_transactions:
+            skipped_subscriptions += 1
+            continue
+
+        subscription_total = Decimal(0)
+        period_end = subscription.expire_at
+
+        for transaction in reversed(user_transactions):
+            period_duration = transaction.plan.duration
+            period_start = period_end - timedelta(days=period_duration)
+
+            if period_end > now:
+                remaining_seconds = Decimal(
+                    str((period_end - max(period_start, now)).total_seconds())
+                )
+                remaining_days = remaining_seconds / Decimal(24 * 60 * 60)
+                deferred_amount = (
+                    transaction.pricing.final_amount
+                    * remaining_days
+                    / Decimal(period_duration)
+                )
+
+                totals[transaction.currency] = (
+                    totals.get(transaction.currency, Decimal(0)) + deferred_amount
+                )
+                subscription_total += deferred_amount
+
+            period_end = period_start
+
+            if period_end <= now:
+                break
+
+        if subscription_total > 0:
+            counted_subscriptions += 1
+        else:
+            skipped_subscriptions += 1
+
+    deferred_income = (
+        "\n".join(
+            i18n.get(
+                "msg-statistics-deferred-income-currency",
+                amount=f"{amount:.2f}",
+                currency=currency.symbol,
+            )
+            for currency, amount in totals.items()
+        )
+        or "-"
+    )
+
+    return {
+        "counted_subscriptions": counted_subscriptions,
+        "skipped_subscriptions": skipped_subscriptions,
+        "deferred_income": deferred_income,
+    }
 
 
 def get_promocodes_statistics(promocodes: list[PromocodeDto]) -> dict[str, Any]:

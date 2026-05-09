@@ -209,6 +209,18 @@ msg-statistics-plans =
 
     { $plans }
 
+msg-statistics-deferred-income =
+    <b>💰 Неполученные деньги</b>
+
+    <blockquote>
+    • <b>Учтено активных подписок</b>: { $counted_subscriptions }
+    • <b>Пропущено подписок</b>: { $skipped_subscriptions }
+    </blockquote>
+
+    <blockquote>
+    { $deferred_income }
+    </blockquote>
+
 msg-statistics-promocodes =
     <b>🎁 Статистика по промокодам</b>
 
@@ -258,6 +270,8 @@ msg-statistics-plan =
     </blockquote>
 
 msg-statistics-plan-income = { $income }{ $currency }
+
+msg-statistics-deferred-income-currency = { $amount }{ $currency }
     
 
 
