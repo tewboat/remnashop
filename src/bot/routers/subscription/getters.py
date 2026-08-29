@@ -221,23 +221,6 @@ async def confirm_getter(
 
 
 @inject
-async def getter_connect(
-    dialog_manager: DialogManager,
-    config: AppConfig,
-    user: UserDto,
-    **kwargs: Any,
-) -> dict[str, Any]:
-    if not user.current_subscription:
-        raise ValueError(f"User '{user.telegram_id}' has no active subscription after purchase")
-
-    return {
-        "is_app": config.bot.is_mini_app,
-        "url": config.bot.mini_app_url or user.current_subscription.url,
-        "connectable": True,
-    }
-
-
-@inject
 async def success_payment_getter(
     dialog_manager: DialogManager,
     config: AppConfig,

@@ -1,10 +1,19 @@
-from aiogram_dialog import Dialog, Window
-from aiogram_dialog.widgets.kbd import Button, Column, Group, Row, Select, SwitchTo, Url
+from aiogram_dialog import Dialog, StartMode, Window
+from aiogram_dialog.widgets.kbd import (
+    Button,
+    Column,
+    Group,
+    Row,
+    Select,
+    Start,
+    SwitchTo,
+    Url,
+)
 from aiogram_dialog.widgets.text import Format
 from magic_filter import F
 
-from src.bot.keyboards import back_main_menu_button, connect_buttons
-from src.bot.states import Subscription
+from src.bot.keyboards import back_main_menu_button
+from src.bot.states import MainMenu, Subscription
 from src.bot.widgets import Banner, I18nFormat, IgnoreUpdate
 from src.core.constants import PURCHASE_PREFIX
 from src.core.enums import BannerName, PaymentGatewayType, PurchaseType
@@ -12,7 +21,6 @@ from src.core.enums import BannerName, PaymentGatewayType, PurchaseType
 from .getters import (
     confirm_getter,
     duration_getter,
-    getter_connect,
     payment_method_getter,
     plans_getter,
     subscription_getter,
@@ -203,7 +211,12 @@ success_payment = Window(
     Banner(BannerName.SUBSCRIPTION),
     I18nFormat("msg-subscription-success"),
     Row(
-        *connect_buttons,
+        Start(
+            text=I18nFormat("btn-menu-connect"),
+            id="connect",
+            state=MainMenu.CONNECT,
+            mode=StartMode.RESET_STACK,
+        ),
     ),
     *back_main_menu_button,
     IgnoreUpdate(),
@@ -215,12 +228,16 @@ success_trial = Window(
     Banner(BannerName.SUBSCRIPTION),
     I18nFormat("msg-subscription-trial"),
     Row(
-        *connect_buttons,
+        Start(
+            text=I18nFormat("btn-menu-connect"),
+            id="connect",
+            state=MainMenu.CONNECT,
+            mode=StartMode.RESET_STACK,
+        ),
     ),
     *back_main_menu_button,
     IgnoreUpdate(),
     state=Subscription.TRIAL,
-    getter=getter_connect,
 )
 
 failed = Window(

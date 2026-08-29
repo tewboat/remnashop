@@ -13,7 +13,12 @@ from .base import EventTypedMiddleware
 
 
 class AccessMiddleware(EventTypedMiddleware):
-    __event_types__ = [MiddlewareEventType.MESSAGE, MiddlewareEventType.CALLBACK_QUERY]
+    __event_types__ = [
+        MiddlewareEventType.MESSAGE,
+        MiddlewareEventType.CALLBACK_QUERY,
+        MiddlewareEventType.MY_CHAT_MEMBER,
+        MiddlewareEventType.PRE_CHECKOUT_QUERY,
+    ]
 
     async def middleware_logic(
         self,

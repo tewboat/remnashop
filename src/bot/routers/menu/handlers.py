@@ -19,6 +19,7 @@ from src.infrastructure.database.models.dto import PlanSnapshotDto, UserDto
 from src.infrastructure.taskiq.tasks.subscriptions import trial_subscription_task
 from src.services.notification import NotificationService
 from src.services.plan import PlanService
+from src.services.qr_code import QrCodeService
 from src.services.referral import ReferralService
 from src.services.remnawave import RemnawaveService
 from src.services.settings import SettingsService
@@ -154,18 +155,43 @@ async def on_show_qr(
     widget: Button,
     dialog_manager: DialogManager,
     referral_service: FromDishka[ReferralService],
+    qr_code_service: FromDishka[QrCodeService],
     notification_service: FromDishka[NotificationService],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
 
     ref_link = await referral_service.get_ref_link(user.referral_code)
-    ref_qr = referral_service.get_ref_qr(ref_link)
+    ref_qr = qr_code_service.create(ref_link, filename="referral_qr.png")
 
     await notification_service.notify_user(
         user=user,
         payload=MessagePayload.not_deleted(
             i18n_key="",
             media=ref_qr,
+            media_type=MediaType.PHOTO,
+        ),
+    )
+
+
+@inject
+async def on_show_subscription_qr(
+    callback: CallbackQuery,
+    widget: Button,
+    dialog_manager: DialogManager,
+    qr_code_service: FromDishka[QrCodeService],
+    notification_service: FromDishka[NotificationService],
+) -> None:
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    subscription = user.current_subscription
+    if not subscription or not subscription.is_active:
+        return
+
+    subscription_qr = qr_code_service.create(subscription.url, filename="subscription_qr.png")
+    await notification_service.notify_user(
+        user=user,
+        payload=MessagePayload.not_deleted(
+            i18n_key="msg-menu-connect-qr",
+            media=subscription_qr,
             media_type=MediaType.PHOTO,
         ),
     )

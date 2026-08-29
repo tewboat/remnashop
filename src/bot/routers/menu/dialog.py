@@ -9,23 +9,30 @@ from aiogram_dialog.widgets.kbd import (
     SwitchInlineQueryChosenChatButton,
     SwitchTo,
     Url,
+    WebApp,
 )
 from aiogram_dialog.widgets.text import Format
 from magic_filter import F
 
-from src.bot.keyboards import connect_buttons
 from src.bot.routers.dashboard.users.handlers import on_user_search
 from src.bot.states import Dashboard, MainMenu, Subscription
 from src.bot.widgets import Banner, I18nFormat, IgnoreUpdate
 from src.core.constants import MIDDLEWARE_DATA_KEY, PURCHASE_PREFIX, USER_KEY
 from src.core.enums import BannerName
 
-from .getters import devices_getter, invite_about_getter, invite_getter, menu_getter
+from .getters import (
+    connect_getter,
+    devices_getter,
+    invite_about_getter,
+    invite_getter,
+    menu_getter,
+)
 from .handlers import (
     on_device_delete,
     on_get_trial,
     on_invite,
     on_show_qr,
+    on_show_subscription_qr,
     on_withdraw_points,
     show_reason,
 )
@@ -34,7 +41,12 @@ menu = Window(
     Banner(BannerName.MENU),
     I18nFormat("msg-main-menu"),
     Row(
-        *connect_buttons,
+        SwitchTo(
+            text=I18nFormat("btn-menu-connect"),
+            id="connect",
+            state=MainMenu.CONNECT,
+            when=F["connectable"],
+        ),
         Button(
             text=I18nFormat("btn-menu-connect-not-available"),
             id="not_available",
@@ -99,6 +111,52 @@ menu = Window(
     IgnoreUpdate(),
     state=MainMenu.MAIN,
     getter=menu_getter,
+)
+
+connect = Window(
+    Banner(BannerName.MENU),
+    I18nFormat("msg-menu-connect"),
+    Row(
+        WebApp(
+            text=I18nFormat("btn-menu-connect-this-device"),
+            url=Format("{url}"),
+            id="connect_this_miniapp",
+            when=F["is_app"],
+        ),
+        Url(
+            text=I18nFormat("btn-menu-connect-this-device"),
+            url=Format("{url}"),
+            id="connect_this_url",
+            when=~F["is_app"],
+        ),
+    ),
+    Row(
+        CopyText(
+            text=I18nFormat("btn-menu-connect-copy"),
+            copy_text=Format("{subscription_url}"),
+        ),
+        Button(
+            text=I18nFormat("btn-menu-connect-qr"),
+            id="subscription_qr",
+            on_click=on_show_subscription_qr,
+        ),
+    ),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-menu-devices"),
+            id="connect_devices",
+            state=MainMenu.DEVICES,
+            when=F["has_device_limit"],
+        ),
+        SwitchTo(
+            text=I18nFormat("btn-back"),
+            id="back",
+            state=MainMenu.MAIN,
+        ),
+    ),
+    IgnoreUpdate(),
+    state=MainMenu.CONNECT,
+    getter=connect_getter,
 )
 
 devices = Window(
@@ -214,6 +272,7 @@ invite_about = Window(
 
 router = Dialog(
     menu,
+    connect,
     devices,
     invite,
     invite_about,

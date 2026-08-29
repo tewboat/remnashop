@@ -119,7 +119,7 @@ class AccessService(BaseService):
             return False
 
         if mode == AccessMode.INVITED:
-            logger.info(f"Access allowed for user '{user.telegram_id}' (mode: INVITED)")
+            logger.info(f"Access allowed for existing user '{user.telegram_id}' (mode: INVITED)")
             return True
 
         return True

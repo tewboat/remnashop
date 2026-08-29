@@ -1,17 +1,14 @@
 from decimal import Decimal
-from io import BytesIO
-from typing import Any, List, Optional, cast
+from typing import List, Optional
 
 from aiogram import Bot
-from aiogram.types import BufferedInputFile, Message, TelegramObject
+from aiogram.types import Message, TelegramObject
 from fluentogram import TranslatorHub
 from loguru import logger
-from PIL import Image
-from qrcode import ERROR_CORRECT_H, QRCode  # type: ignore[attr-defined]
 from redis.asyncio import Redis
 
 from src.core.config import AppConfig
-from src.core.constants import ASSETS_DIR, REFERRAL_PREFIX, T_ME
+from src.core.constants import REFERRAL_PREFIX, T_ME
 from src.core.enums import (
     MessageEffect,
     PurchaseType,
@@ -284,43 +281,6 @@ class ReferralService(BaseService):
 
     async def get_ref_link(self, referral_code: str) -> str:
         return f"{await self._get_bot_redirect_url()}?start={REFERRAL_PREFIX}{referral_code}"
-
-    def get_ref_qr(self, url: str) -> BufferedInputFile:
-        qr: Any = QRCode(
-            version=1,
-            error_correction=ERROR_CORRECT_H,
-            box_size=10,
-            border=4,
-        )
-
-        qr.add_data(url)
-        qr.make(fit=True)
-
-        qr_img_raw = qr.make_image(fill_color="black", back_color="white")
-        qr_img: Image.Image
-        if hasattr(qr_img_raw, "get_image"):
-            qr_img = cast(Image.Image, qr_img_raw.get_image())
-        else:
-            qr_img = cast(Image.Image, qr_img_raw)
-
-        qr_img = qr_img.convert("RGB")
-
-        logo_path = ASSETS_DIR / "logo.png"
-        if logo_path.exists():
-            logo = Image.open(logo_path).convert("RGBA")
-
-            qr_width, qr_height = qr_img.size
-            logo_size = int(qr_width * 0.2)
-            logo = logo.resize((logo_size, logo_size), resample=Image.Resampling.LANCZOS)
-
-            pos = ((qr_width - logo_size) // 2, (qr_height - logo_size) // 2)
-            qr_img.paste(logo, pos, mask=logo)
-
-        buffer = BytesIO()
-        qr_img.save(buffer, format="PNG")
-        buffer.seek(0)
-
-        return BufferedInputFile(file=buffer.getvalue(), filename="ref_qr.png")
 
     async def get_referrer_by_event(
         self,

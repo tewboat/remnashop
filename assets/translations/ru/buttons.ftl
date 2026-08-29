@@ -28,7 +28,10 @@ btn-squad-choice = { $selected ->
 
 
 # Menu
-btn-menu-connect = 🚀 Подключиться
+btn-menu-connect = 📱 Подключить устройство
+btn-menu-connect-this-device = 📲 Подключить это устройство
+btn-menu-connect-copy = 🔗 Скопировать ссылку
+btn-menu-connect-qr = 🧾 QR-код
 
 btn-menu-connect-not-available =
     ⚠️ { $status -> 

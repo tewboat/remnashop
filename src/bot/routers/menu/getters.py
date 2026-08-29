@@ -88,6 +88,19 @@ async def menu_getter(
         raise MenuRenderingError(str(exception)) from exception
 
 
+async def connect_getter(config: AppConfig, user: UserDto, **kwargs: Any) -> dict[str, Any]:
+    subscription = user.current_subscription
+    if not subscription or not subscription.is_active:
+        raise ValueError(f"User '{user.telegram_id}' has no active subscription")
+
+    return {
+        "is_app": config.bot.is_mini_app,
+        "url": config.bot.mini_app_url or subscription.url,
+        "subscription_url": subscription.url,
+        "has_device_limit": subscription.has_devices_limit,
+    }
+
+
 @inject
 async def devices_getter(
     dialog_manager: DialogManager,
