@@ -1,4 +1,4 @@
-﻿from uuid import UUID
+from uuid import UUID
 
 from dishka.integrations.taskiq import FromDishka, inject
 from loguru import logger
@@ -7,6 +7,7 @@ from remnawave.exceptions import BadRequestError
 from remnawave.models import CreateUserRequestDto, UserResponseDto
 
 from src.core.storage.keys import SyncRunningKey
+from src.core.utils.remnawave import validate_remnawave_response
 from src.infrastructure.redis.repository import RedisRepository
 from src.infrastructure.taskiq.broker import broker
 from src.services.remnawave import RemnawaveService
@@ -59,11 +60,13 @@ async def sync_all_users_from_panel_task(
     start = 0
     size = 50
 
-    stats = await remnawave.system.get_stats()
-    total_users = stats.users.total_users
+    stats = validate_remnawave_response(await remnawave.system.get_stats())
+    total_users = int(stats.users.total_users)
 
     for start in range(0, total_users, size):
-        response = await remnawave.users.get_all_users(start=start, size=size)
+        response = validate_remnawave_response(
+            await remnawave.users.get_all_users(start=start, size=size)
+        )
         if not response.users:
             break
 

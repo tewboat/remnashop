@@ -1,9 +1,11 @@
-﻿from typing import Any
+from typing import Any
 
 from aiogram_dialog import DialogManager
 from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
 from remnawave import RemnawaveSDK
+
+from src.core.utils.remnawave import validate_remnawave_response
 
 
 async def from_xui_getter(
@@ -31,7 +33,7 @@ async def squads_getter(
     remnawave: FromDishka[RemnawaveSDK],
     **kwargs: Any,
 ) -> dict[str, Any]:
-    result = await remnawave.internal_squads.get_internal_squads()
+    result = validate_remnawave_response(await remnawave.internal_squads.get_internal_squads())
     selected_squads = dialog_manager.dialog_data.get("selected_squads", [])
 
     squads = [

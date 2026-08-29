@@ -1,4 +1,4 @@
-﻿from typing import Any, Optional, cast
+from typing import Any, Optional, cast
 
 from aiogram_dialog import DialogManager
 from dishka import FromDishka
@@ -20,6 +20,7 @@ from src.core.utils.formatters import (
     i18n_format_expire_time,
     i18n_format_traffic_limit,
 )
+from src.core.utils.remnawave import validate_remnawave_response
 from src.infrastructure.database.models.dto import UserDto
 from src.infrastructure.database.models.dto.subscription import RemnaSubscriptionDto
 from src.services.plan import PlanService
@@ -117,7 +118,9 @@ async def subscription_getter(
 
     last_node: Optional[GetOneNodeResponseDto] = None
     if remna_user.last_connected_node_uuid:
-        result = await remnawave.nodes.get_one_node(remna_user.last_connected_node_uuid)
+        result = validate_remnawave_response(
+            await remnawave.nodes.get_one_node(str(remna_user.last_connected_node_uuid))
+        )
         last_node = result
 
     return {
@@ -275,13 +278,17 @@ async def squads_getter(
     if not subscription:
         raise ValueError(f"Current subscription for user '{target_telegram_id}' not found")
 
-    internal_response = await remnawave.internal_squads.get_internal_squads()
+    internal_response = validate_remnawave_response(
+        await remnawave.internal_squads.get_internal_squads()
+    )
     internal_dict = {s.uuid: s.name for s in internal_response.internal_squads}
     internal_squads_names = ", ".join(
         internal_dict.get(squad, str(squad)) for squad in subscription.internal_squads
     )
 
-    external_response = await remnawave.external_squads.get_external_squads()
+    external_response = validate_remnawave_response(
+        await remnawave.external_squads.get_external_squads()
+    )
     external_dict = {s.uuid: s.name for s in external_response.external_squads}
     external_squad_name = (
         external_dict.get(subscription.external_squad) if subscription.external_squad else False
@@ -306,7 +313,7 @@ async def internal_squads_getter(
     if not subscription:
         raise ValueError(f"Current subscription for user '{target_telegram_id}' not found")
 
-    result = await remnawave.internal_squads.get_internal_squads()
+    result = validate_remnawave_response(await remnawave.internal_squads.get_internal_squads())
 
     squads = [
         {
@@ -333,7 +340,7 @@ async def external_squads_getter(
     if not subscription:
         raise ValueError(f"Current subscription for user '{target_telegram_id}' not found")
 
-    result = await remnawave.external_squads.get_external_squads()
+    result = validate_remnawave_response(await remnawave.external_squads.get_external_squads())
     existing_squad_uuids = {squad.uuid for squad in result.external_squads}
 
     if subscription.external_squad and subscription.external_squad not in existing_squad_uuids:
@@ -557,7 +564,9 @@ async def sync_getter(  # noqa: C901
     remna_subscription: Optional[RemnaSubscriptionDto] = None
 
     try:
-        result = await remnawave.users.get_users_by_telegram_id(telegram_id=str(target_telegram_id))
+        result = validate_remnawave_response(
+            await remnawave.users.get_users_by_telegram_id(telegram_id=str(target_telegram_id))
+        )
     except NotFoundError:
         result = None
 
@@ -570,7 +579,9 @@ async def sync_getter(  # noqa: C901
     bot_version = ""
     remna_version = ""
 
-    internal_response = await remnawave.internal_squads.get_internal_squads()
+    internal_response = validate_remnawave_response(
+        await remnawave.internal_squads.get_internal_squads()
+    )
     internal_dict = {s.uuid: s.name for s in internal_response.internal_squads}
 
     if bot_subscription:

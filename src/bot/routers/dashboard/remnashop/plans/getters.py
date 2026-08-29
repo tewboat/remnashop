@@ -1,4 +1,4 @@
-﻿from decimal import Decimal
+from decimal import Decimal
 from typing import Any, Optional
 
 from aiogram_dialog import DialogManager
@@ -9,6 +9,7 @@ from remnawave.enums.users import TrafficLimitStrategy
 
 from src.core.enums import Currency, PlanAvailability, PlanType
 from src.core.utils.adapter import DialogDataAdapter
+from src.core.utils.remnawave import validate_remnawave_response
 from src.infrastructure.database.models.dto import PlanDto, PlanDurationDto, PlanPriceDto
 from src.services.plan import PlanService
 
@@ -219,13 +220,17 @@ async def squads_getter(
     if not plan:
         raise ValueError("PlanDto not found in dialog data")
 
-    internal_response = await remnawave.internal_squads.get_internal_squads()
+    internal_response = validate_remnawave_response(
+        await remnawave.internal_squads.get_internal_squads()
+    )
     internal_dict = {s.uuid: s.name for s in internal_response.internal_squads}
     internal_squads_names = ", ".join(
         internal_dict.get(squad, str(squad)) for squad in plan.internal_squads
     )
 
-    external_response = await remnawave.external_squads.get_external_squads()
+    external_response = validate_remnawave_response(
+        await remnawave.external_squads.get_external_squads()
+    )
     external_dict = {s.uuid: s.name for s in external_response.external_squads}
     external_squad_name = external_dict.get(plan.external_squad) if plan.external_squad else False
 
@@ -247,7 +252,7 @@ async def internal_squads_getter(
     if not plan:
         raise ValueError("PlanDto not found in dialog data")
 
-    result = await remnawave.internal_squads.get_internal_squads()
+    result = validate_remnawave_response(await remnawave.internal_squads.get_internal_squads())
     existing_squad_uuids = {squad.uuid for squad in result.internal_squads}
 
     if plan.internal_squads:
@@ -283,7 +288,7 @@ async def external_squads_getter(
     if not plan:
         raise ValueError("PlanDto not found in dialog data")
 
-    result = await remnawave.external_squads.get_external_squads()
+    result = validate_remnawave_response(await remnawave.external_squads.get_external_squads())
     existing_squad_uuids = {squad.uuid for squad in result.external_squads}
 
     if plan.external_squad and plan.external_squad not in existing_squad_uuids:

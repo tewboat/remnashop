@@ -1,4 +1,4 @@
-﻿from datetime import timedelta
+from datetime import timedelta
 from typing import Optional, Union
 from uuid import UUID
 
@@ -20,6 +20,7 @@ from src.core.constants import USER_KEY
 from src.core.enums import SubscriptionStatus, UserRole
 from src.core.utils.formatters import format_user_log as log
 from src.core.utils.message_payload import MessagePayload
+from src.core.utils.remnawave import validate_remnawave_response
 from src.core.utils.time import datetime_now
 from src.core.utils.validators import is_double_click, parse_int
 from src.infrastructure.database.models.dto import UserDto
@@ -133,7 +134,7 @@ async def on_active_toggle(
         remnawave.users.disable_user if subscription.is_active else remnawave.users.enable_user
     )
 
-    await remnawave_toggle_status(subscription.user_remna_id)
+    await remnawave_toggle_status(str(subscription.user_remna_id))
     subscription.status = new_status
     await subscription_service.update(subscription)
     logger.info(
@@ -261,7 +262,7 @@ async def on_reset_traffic(
     if not subscription:
         raise ValueError(f"Current subscription for user '{target_telegram_id}' not found")
 
-    await remnawave.users.reset_user_traffic(subscription.user_remna_id)
+    await remnawave.users.reset_user_traffic(str(subscription.user_remna_id))
     logger.info(f"{log(user)} Reset trafic for user '{target_telegram_id}'")
 
 
@@ -907,7 +908,9 @@ async def on_sync(
     remna_subscription: Optional[RemnaSubscriptionDto] = None
 
     try:
-        result = await remnawave.users.get_users_by_telegram_id(telegram_id=str(target_telegram_id))
+        result = validate_remnawave_response(
+            await remnawave.users.get_users_by_telegram_id(telegram_id=str(target_telegram_id))
+        )
     except NotFoundError:
         result = None
 
@@ -952,7 +955,9 @@ async def on_sync_from_remnawave(
     subscription = await subscription_service.get_current(target_telegram_id)
 
     try:
-        result = await remnawave.users.get_users_by_telegram_id(telegram_id=str(target_telegram_id))
+        result = validate_remnawave_response(
+            await remnawave.users.get_users_by_telegram_id(telegram_id=str(target_telegram_id))
+        )
     except NotFoundError:
         result = None
 

@@ -2,7 +2,7 @@ from uuid import UUID
 
 from aiogram import F, Router
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, Message
 from dishka import FromDishka
 from loguru import logger
 
@@ -86,7 +86,7 @@ async def on_sbp_decision(
         )
         await callback.answer("Платеж отклонен")
 
-    if callback.message:
+    if isinstance(callback.message, Message):
         try:
             await callback.message.edit_reply_markup(reply_markup=None)
         except TelegramBadRequest:

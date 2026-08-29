@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 
 from aiogram import Bot
 from aiogram.types import CallbackQuery, Message
@@ -15,6 +15,7 @@ from src.core.constants import USER_KEY
 from src.core.storage.keys import SyncRunningKey
 from src.core.utils.formatters import format_user_log as log
 from src.core.utils.message_payload import MessagePayload
+from src.core.utils.remnawave import validate_remnawave_response
 from src.core.utils.validators import is_double_click
 from src.infrastructure.database.models.dto import UserDto
 from src.infrastructure.redis.repository import RedisRepository
@@ -106,7 +107,7 @@ async def on_squads(
     notification_service: FromDishka[NotificationService],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
-    result = await remnawave.internal_squads.get_internal_squads()
+    result = validate_remnawave_response(await remnawave.internal_squads.get_internal_squads())
 
     if not result.internal_squads:
         await notification_service.notify_user(

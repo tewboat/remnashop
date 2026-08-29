@@ -1,4 +1,4 @@
-﻿from typing import Any, Optional
+from typing import Any, Optional, cast
 
 from aiogram_dialog import DialogManager
 from aiogram_dialog.widgets.common import ManagedScroll
@@ -6,6 +6,7 @@ from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
 from fluentogram import TranslatorRunner
 from remnawave import RemnawaveSDK
+from remnawave.models.inbounds import GetAllInboundsResponseDto
 
 from src.core.i18n.translator import get_translated_kwargs
 from src.core.utils.formatters import (
@@ -14,6 +15,7 @@ from src.core.utils.formatters import (
     i18n_format_bytes_to_unit,
     i18n_format_seconds,
 )
+from src.core.utils.remnawave import validate_remnawave_response
 
 
 @inject
@@ -22,7 +24,7 @@ async def system_getter(
     remnawave: FromDishka[RemnawaveSDK],
     **kwargs: Any,
 ) -> dict[str, Any]:
-    result = await remnawave.system.get_stats()
+    result = validate_remnawave_response(await remnawave.system.get_stats())
     cpu_cores = result.cpu.physical_cores or result.cpu.cores
     ram_used = result.memory.active or result.memory.used
 
@@ -46,7 +48,7 @@ async def users_getter(
     remnawave: FromDishka[RemnawaveSDK],
     **kwargs: Any,
 ) -> dict[str, Any]:
-    result = await remnawave.system.get_stats()
+    result = validate_remnawave_response(await remnawave.system.get_stats())
 
     return {
         "users_total": str(result.users.total_users),
@@ -74,7 +76,7 @@ async def hosts_getter(
         raise ValueError()
 
     current_page = await widget.get_page()
-    result = await remnawave.hosts.get_all_hosts()
+    result = validate_remnawave_response(await remnawave.hosts.get_all_hosts())
     hosts = []
 
     for host in result:
@@ -109,7 +111,7 @@ async def nodes_getter(
         raise ValueError()
 
     current_page = await widget.get_page()
-    result = await remnawave.nodes.get_all_nodes()
+    result = validate_remnawave_response(await remnawave.nodes.get_all_nodes())
     nodes = []
 
     for node in result:
@@ -158,10 +160,12 @@ async def inbounds_getter(
         raise ValueError()
 
     current_page = await widget.get_page()
-    result = await remnawave.inbounds.get_all_inbounds()
+    result: GetAllInboundsResponseDto = validate_remnawave_response(
+        cast(Any, await remnawave.inbounds.get_all_inbounds())
+    )
     inbounds = []
 
-    for inbound in result.inbounds:  # type: ignore[attr-defined]
+    for inbound in result.inbounds:
         inbounds.append(
             i18n.get(
                 "msg-remnawave-inbound-details",
