@@ -1,12 +1,3 @@
-# Remnashop
-ntf-remnashop-info = 
-    <b>💎 Remnashop v{ $version }</b>
-
-    Данный проект был создан и поддерживается всего одним <strike>разработчиком</strike> электриком. Поскольку бот полностью БЕСПЛАТНЫЙ и с открытым исходным кодом, он существует только благодаря вашей поддержке.
-
-    ⭐ <i>Поставьте звездочку на <a href="{ $repository }">GitHub</a> и присоединяйтесь к нашему <a href="https://t.me/@remna_shop">сообществу</a>.</i>
-
-
 # Menu
 msg-main-menu =
     { hdr-user-profile }

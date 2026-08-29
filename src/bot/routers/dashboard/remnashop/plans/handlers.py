@@ -1,4 +1,4 @@
-from decimal import Decimal
+﻿from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
@@ -9,8 +9,8 @@ from aiogram_dialog.widgets.kbd import Button, Select
 from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
 from loguru import logger
-from remnapy import RemnawaveSDK
-from remnapy.enums.users import TrafficLimitStrategy
+from remnawave import RemnawaveSDK
+from remnawave.enums.users import TrafficLimitStrategy
 
 from src.bot.states import RemnashopPlans
 from src.core.constants import TAG_REGEX, USER_KEY

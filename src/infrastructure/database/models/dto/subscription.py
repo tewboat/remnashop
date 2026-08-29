@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional, Union
 
@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from uuid import UUID
 
 from pydantic import BaseModel, Field
-from remnapy.enums import TrafficLimitStrategy
+from remnawave.enums import TrafficLimitStrategy
 
 from src.core.enums import PlanType, SubscriptionStatus
 from src.core.utils.formatters import (

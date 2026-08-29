@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 
 from aiogram import Bot
 from aiogram.types import CallbackQuery, Message
@@ -8,7 +8,7 @@ from aiogram_dialog.widgets.kbd import Button, Select
 from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
 from loguru import logger
-from remnapy import RemnawaveSDK
+from remnawave import RemnawaveSDK
 
 from src.bot.states import DashboardImporter
 from src.core.constants import USER_KEY

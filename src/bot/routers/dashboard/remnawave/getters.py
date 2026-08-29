@@ -1,11 +1,11 @@
-from typing import Any, Optional
+﻿from typing import Any, Optional
 
 from aiogram_dialog import DialogManager
 from aiogram_dialog.widgets.common import ManagedScroll
 from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
 from fluentogram import TranslatorRunner
-from remnapy import RemnawaveSDK
+from remnawave import RemnawaveSDK
 
 from src.core.i18n.translator import get_translated_kwargs
 from src.core.utils.formatters import (
@@ -23,18 +23,20 @@ async def system_getter(
     **kwargs: Any,
 ) -> dict[str, Any]:
     result = await remnawave.system.get_stats()
+    cpu_cores = result.cpu.physical_cores or result.cpu.cores
+    ram_used = result.memory.active or result.memory.used
 
     return {
         "version": "",  # TODO: Добавить версию панели
-        "cpu_cores": result.cpu.physical_cores,
+        "cpu_cores": cpu_cores,
         "cpu_threads": result.cpu.cores,
-        "ram_used": i18n_format_bytes_to_unit(result.memory.active),
-        "ram_total": i18n_format_bytes_to_unit(result.memory.total),
+        "ram_used": i18n_format_bytes_to_unit(int(ram_used)),
+        "ram_total": i18n_format_bytes_to_unit(int(result.memory.total)),
         "ram_used_percent": format_percent(
-            part=result.memory.active,
-            whole=result.memory.total,
+            part=int(ram_used),
+            whole=int(result.memory.total),
         ),
-        "uptime": i18n_format_seconds(result.uptime),
+        "uptime": i18n_format_seconds(int(result.uptime)),
     }
 
 

@@ -16,15 +16,11 @@ from fluentogram import TranslatorHub
 from loguru import logger
 from redis.asyncio import Redis
 
-from src.__version__ import __version__
-from src.bot.keyboards import get_remnashop_keyboard
 from src.bot.states import Notification
 from src.core.config import AppConfig
-from src.core.constants import REPOSITORY
 from src.core.enums import (
     Locale,
     MediaType,
-    MessageEffect,
     SystemNotificationType,
     UserNotificationType,
     UserRole,
@@ -120,18 +116,6 @@ class NotificationService(BaseService):
             f"Attempting to send super dev notification '{payload.i18n_key}' to '{dev.telegram_id}'"
         )
 
-        return bool(await self._send_message(user=dev, payload=payload))
-
-    async def remnashop_notify(self) -> bool:
-        dev = await self.user_service.get(self.config.bot.dev_id) or self._get_temp_dev()
-        payload = MessagePayload(
-            i18n_key="ntf-remnashop-info",
-            i18n_kwargs={"version": __version__, "repository": REPOSITORY},
-            reply_markup=get_remnashop_keyboard(),
-            auto_delete_after=None,
-            add_close_button=True,
-            message_effect=MessageEffect.LOVE,
-        )
         return bool(await self._send_message(user=dev, payload=payload))
 
     async def error_notify(

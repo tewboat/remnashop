@@ -1,12 +1,12 @@
-from typing import Any, Optional, cast
+﻿from typing import Any, Optional, cast
 
 from aiogram_dialog import DialogManager
 from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
 from fluentogram import TranslatorRunner
-from remnapy import RemnawaveSDK
-from remnapy.exceptions import NotFoundError
-from remnapy.models import GetOneNodeResponseDto
+from remnawave import RemnawaveSDK
+from remnawave.exceptions import NotFoundError
+from remnawave.models import GetOneNodeResponseDto
 
 from src.core.config import AppConfig
 from src.core.constants import DATETIME_FORMAT

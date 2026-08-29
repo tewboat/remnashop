@@ -1,4 +1,4 @@
-from datetime import timedelta
+﻿from datetime import timedelta
 from typing import Optional, Union
 from uuid import UUID
 
@@ -10,8 +10,8 @@ from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
 from fluentogram import TranslatorRunner
 from loguru import logger
-from remnapy import RemnawaveSDK
-from remnapy.exceptions import NotFoundError
+from remnawave import RemnawaveSDK
+from remnawave.exceptions import NotFoundError
 
 from src.bot.keyboards import get_contact_support_keyboard
 from src.bot.states import DashboardUser

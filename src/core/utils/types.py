@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Annotated, NewType, TypeAlias, Union
+﻿from typing import TYPE_CHECKING, Annotated, NewType, TypeAlias, Union
 
 from aiogram.types import (
     BufferedInputFile,
@@ -9,8 +9,8 @@ from aiogram.types import (
     ReplyKeyboardRemove,
 )
 from pydantic import PlainValidator
-from remnapy.models import UserResponseDto
-from remnapy.models.webhook import UserDto as UserWebhookDto
+from remnawave.models import UserResponseDto
+from remnawave.models.webhook import UserDto as UserWebhookDto
 
 from src.core.enums import Locale, SystemNotificationType, UserNotificationType
 

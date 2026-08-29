@@ -1,11 +1,11 @@
-import traceback
+﻿import traceback
 from datetime import timedelta
 from typing import Optional, cast
 
 from aiogram.utils.formatting import Text
 from dishka.integrations.taskiq import FromDishka, inject
 from loguru import logger
-from remnapy.exceptions import ConflictError
+from remnawave.exceptions import ConflictError
 
 from src.bot.keyboards import get_user_keyboard
 from src.core.enums import (

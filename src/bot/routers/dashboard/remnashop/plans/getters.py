@@ -1,11 +1,11 @@
-from decimal import Decimal
+﻿from decimal import Decimal
 from typing import Any, Optional
 
 from aiogram_dialog import DialogManager
 from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
-from remnapy import RemnawaveSDK
-from remnapy.enums.users import TrafficLimitStrategy
+from remnawave import RemnawaveSDK
+from remnawave.enums.users import TrafficLimitStrategy
 
 from src.core.enums import Currency, PlanAvailability, PlanType
 from src.core.utils.adapter import DialogDataAdapter

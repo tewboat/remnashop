@@ -1,9 +1,9 @@
-from decimal import Decimal
+﻿from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
 from pydantic import Field
-from remnapy.enums.users import TrafficLimitStrategy
+from remnawave.enums.users import TrafficLimitStrategy
 
 from src.core.enums import Currency, PlanAvailability, PlanType
 

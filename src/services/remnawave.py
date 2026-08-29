@@ -1,4 +1,4 @@
-from datetime import timedelta
+﻿from datetime import timedelta
 from typing import Optional, cast
 from uuid import UUID
 
@@ -6,9 +6,9 @@ from aiogram import Bot
 from fluentogram import TranslatorHub
 from loguru import logger
 from redis.asyncio import Redis
-from remnapy import RemnawaveSDK
-from remnapy.exceptions import ConflictError, NotFoundError
-from remnapy.models import (
+from remnawave import RemnawaveSDK
+from remnawave.exceptions import ConflictError, NotFoundError
+from remnawave.models import (
     CreateUserRequestDto,
     CreateUserResponseDto,
     GetStatsResponseDto,
@@ -17,8 +17,8 @@ from remnapy.models import (
     UpdateUserRequestDto,
     UserResponseDto,
 )
-from remnapy.models.hwid import HwidDeviceDto
-from remnapy.models.webhook import NodeDto
+from remnawave.models.hwid import HwidDeviceDto
+from remnawave.models.webhook import NodeDto
 
 from src.bot.keyboards import get_user_keyboard
 from src.core.config import AppConfig

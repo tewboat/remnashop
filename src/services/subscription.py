@@ -1,11 +1,11 @@
-from datetime import datetime, timedelta
+﻿from datetime import datetime, timedelta
 from typing import Optional, TypeVar, Union
 
 from aiogram import Bot
 from fluentogram import TranslatorHub
 from loguru import logger
 from redis.asyncio import Redis
-from remnapy.enums.users import TrafficLimitStrategy
+from remnawave.enums.users import TrafficLimitStrategy
 from sqlalchemy import and_
 
 from src.core.config import AppConfig

@@ -882,23 +882,6 @@ wheels = [
 ]
 
 [[package]]
-name = "remnapy"
-version = "2.3.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "cryptography" },
-    { name = "httpx" },
-    { name = "orjson" },
-    { name = "pydantic", extra = ["email"] },
-    { name = "pydantic-core" },
-    { name = "rapid-api-client" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b5/02/6a85175242e312de064d9ac3255dff46f94c2ba35afe90fdf1b6bd8bfa3f/remnapy-2.3.3.tar.gz", hash = "sha256:e0ce86e32476170ca47933f1c2c7c8b55eef35d80d153774f4e24addf84854af", size = 124384, upload-time = "2025-12-21T12:24:32.197Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/d4/dc/22e9ff49d4fa71275939a6cf65822e96e80c44d1327df7473025e4cfda31/remnapy-2.3.3-py3-none-any.whl", hash = "sha256:a03c44e87cb3330a3dd3123b0a6a85e7f32ceaf9917bd5966f9fa82a228b2ea9", size = 78565, upload-time = "2025-12-21T12:24:30.767Z" },
-]
-
-[[package]]
 name = "remnashop"
 version = "0.0.0"
 source = { virtual = "." }
@@ -917,7 +900,7 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "qrcode", extra = ["pil"] },
     { name = "redis" },
-    { name = "remnapy" },
+    { name = "remnawave-api" },
     { name = "sqlalchemy", extra = ["mypy"] },
     { name = "taskiq", extra = ["orjson"] },
     { name = "taskiq-redis" },
@@ -950,7 +933,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = "~=2.11.0" },
     { name = "qrcode", extras = ["pil"], specifier = ">=8.2" },
     { name = "redis", specifier = "~=7.0.0" },
-    { name = "remnapy", specifier = ">=2.3.3" },
+    { name = "remnawave-api", specifier = ">=2.7.1,<2.8.0" },
     { name = "sqlalchemy", extras = ["mypy"], specifier = ">=2.0.0" },
     { name = "taskiq", extras = ["orjson"], specifier = "~=0.12.1" },
     { name = "taskiq-redis", specifier = "~=1.2.0" },
@@ -965,6 +948,23 @@ dev = [
     { name = "ruff", specifier = ">=0.14.2" },
     { name = "types-cachetools" },
     { name = "watchfiles", specifier = ">=1.1.1" },
+]
+
+[[package]]
+name = "remnawave-api"
+version = "2.7.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cryptography" },
+    { name = "httpx" },
+    { name = "orjson" },
+    { name = "pydantic", extra = ["email"] },
+    { name = "pydantic-core" },
+    { name = "rapid-api-client" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c9/4b/c1c046a5185cf2c60c92c88e364f3d0bdb0402b95d3bae896ac768191018/remnawave_api-2.7.1.tar.gz", hash = "sha256:3d6efd92f039f85da30b5ca4c565b0f63fb3387760fee49263653f858ec1e9c2", size = 59345, upload-time = "2026-07-30T16:39:39.552Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/73/9b/fe32d7b34d9c4bac398e3c74b46d8a50bea57cbc848784be19b9720159de/remnawave_api-2.7.1-py3-none-any.whl", hash = "sha256:11e412e3b8ed082f4279a325b8570729b7cad0e79575247cff51cdbcee741edd", size = 91956, upload-time = "2026-07-30T16:39:38.228Z" },
 ]
 
 [[package]]

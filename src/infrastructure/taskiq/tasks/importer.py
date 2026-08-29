@@ -1,10 +1,10 @@
-from uuid import UUID
+﻿from uuid import UUID
 
 from dishka.integrations.taskiq import FromDishka, inject
 from loguru import logger
-from remnapy import RemnawaveSDK
-from remnapy.exceptions import BadRequestError
-from remnapy.models import CreateUserRequestDto, UserResponseDto
+from remnawave import RemnawaveSDK
+from remnawave.exceptions import BadRequestError
+from remnawave.models import CreateUserRequestDto, UserResponseDto
 
 from src.core.storage.keys import SyncRunningKey
 from src.infrastructure.redis.repository import RedisRepository

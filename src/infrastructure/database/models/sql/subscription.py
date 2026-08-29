@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 from datetime import datetime
 from uuid import UUID
 
-from remnapy.enums import TrafficLimitStrategy
+from remnawave.enums import TrafficLimitStrategy
 from sqlalchemy import ARRAY, JSON, BigInteger, Boolean, DateTime, Enum, ForeignKey, Integer, String
 from sqlalchemy import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship

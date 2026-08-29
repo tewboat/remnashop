@@ -8,12 +8,6 @@ btn-back-dashboard = ↩️ Вернуться в панель управлен�
 # Remnashop
 btn-remnashop-release-latest = 👀 Посмотреть
 btn-remnashop-how-upgrade = ❓ Как обновить
-btn-remnashop-github = ⭐ GitHub
-btn-remnashop-telegram = 👪 Telegram
-btn-remnashop-donate = 💰 Поддержать разработчика
-btn-remnashop-guide = ❓ Инструкция
-
-
 # Other
 btn-rules-accept = ✅ Принять правила
 btn-channel-join = ❤️ Перейти в канал

@@ -1,4 +1,4 @@
-import traceback
+﻿import traceback
 from typing import cast
 
 from aiogram.utils.formatting import Text
@@ -6,8 +6,8 @@ from dishka import FromDishka
 from dishka.integrations.fastapi import inject
 from fastapi import APIRouter, HTTPException, Request, Response, status
 from loguru import logger
-from remnapy.controllers import WebhookUtility
-from remnapy.models.webhook import NodeDto, UserDto, UserHwidDeviceEventDto
+from remnawave.controllers import WebhookUtility
+from remnawave.models.webhook import NodeDto, UserDto, UserHwidDeviceEventDto
 
 from src.core.config import AppConfig
 from src.core.constants import API_V1, REMNAWAVE_WEBHOOK_PATH
